@@ -6,6 +6,7 @@ const statusBarItem = vscode.window.createStatusBarItem(
   vscode.StatusBarAlignment.Right,
   100
 );
+let updateTimer: NodeJS.Timeout | undefined;
 const commentPlaceholders = [
   "Debug the debugger's debugger",
   'Perfect the art of the pixel push',
@@ -21,6 +22,88 @@ const commentPlaceholders = [
 
 export function activate(context: vscode.ExtensionContext) {
   outputChannel.appendLine('Coffeecup is now active!');
+
+  exec('coffeecup version', (error, stdout, stderr) => {
+    if (error) {
+      outputChannel.appendLine(
+        `exec error while running 'coffeecup version': "${error}"`
+      );
+
+      statusBarItem.dispose();
+      if (error.message.includes('is not a valid command')) {
+        outputChannel.appendLine(
+          `Coffeecup CLI version is outdated: "${stdout}"`
+        );
+
+        statusBarItem.dispose();
+
+        vscode.window
+          .showErrorMessage(
+            `Your coffeecup CLI is outdated!`,
+            'Visit Coffeecup CLI on GitHub to update'
+          )
+          .then((selection) => {
+            if (!selection) {
+              return;
+            }
+
+            vscode.env.openExternal(
+              vscode.Uri.parse(
+                'https://github.com/fischeversenker/coffeecup-cli'
+              )
+            );
+          });
+      } else {
+        vscode.window
+          .showErrorMessage(
+            `It looks like the coffeecup CLI is not installed!`,
+            'Visit Coffeecup CLI on GitHub'
+          )
+          .then((selection) => {
+            if (!selection) {
+              return;
+            }
+
+            vscode.env.openExternal(
+              vscode.Uri.parse(
+                'https://github.com/fischeversenker/coffeecup-cli'
+              )
+            );
+          });
+      }
+    }
+
+    if (stderr) {
+      outputChannel.appendLine(
+        `stderr while running 'coffeecup version': "${stderr}"`
+      );
+    }
+
+    const versionParts = stdout.split('.');
+    const patchVersion = Number(versionParts.at(-1) ?? '0');
+    if (patchVersion < 6) {
+      outputChannel.appendLine(
+        `Coffeecup CLI version is outdated: "${stdout}"`
+      );
+
+      statusBarItem.dispose();
+
+      vscode.window
+        .showErrorMessage(
+          `Your coffeecup CLI is outdated!`,
+          'Visit Coffeecup CLI on GitHub to update'
+        )
+        .then((selection) => {
+          if (!selection) {
+            return;
+          }
+
+          vscode.env.openExternal(
+            vscode.Uri.parse('https://github.com/fischeversenker/coffeecup-cli')
+          );
+        });
+    }
+  });
 
   function update() {
     exec('coffeecup today', (error, stdout, stderr) => {
@@ -73,8 +156,13 @@ export function activate(context: vscode.ExtensionContext) {
           `Result of "coffeecup projects alias":\n${stdout}`
         );
 
-        const lines = stdout.split('\n').slice(1, -1);
-        const aliases = lines.map((line) => line.split(' ')[1]);
+        const lines = stdout.split('\n');
+        const aliases = lines
+          .map((line) => {
+            const parts = line.match(/^(\S+)\s+(.*?)\s+\(ID:\s*(\d+)\)$/);
+            return parts ? parts[1] : undefined;
+          })
+          .filter(Boolean) as string[];
         const theNoOption = "Don't start anything new. Stop the current task.";
         aliases.push(theNoOption);
 
@@ -174,7 +262,7 @@ export function activate(context: vscode.ExtensionContext) {
   update();
 
   // Update status bar every minute
-  setInterval(update, 1000 * 60);
+  updateTimer = setInterval(update, 1000 * 60);
 
   context.subscriptions.push(statusBarItem);
   context.subscriptions.push(switchTaskCommand);
@@ -182,4 +270,8 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(outputChannel);
 }
 
-export function deactivate() {}
+export function deactivate() {
+  if (updateTimer) {
+    clearInterval(updateTimer);
+  }
+}
