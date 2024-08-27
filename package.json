@@ -3,7 +3,7 @@
   "publisher": "fischeversenker",
   "displayName": "Coffeecup",
   "description": "Start, resume, or stop new Coffeecup time entries. Requires Coffeecup CLI to be installed.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "icon": "images/icon.png",
   "repository": {
     "type": "git",
