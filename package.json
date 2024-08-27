@@ -22,8 +22,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "coffeecup.switchProjects",
-        "title": "Coffeecup: Switch Projects"
+        "command": "coffeecup.switchTasks",
+        "title": "Coffeecup: Switch Tasks"
       },
       {
         "command": "coffeecup.stop",

@@ -135,10 +135,10 @@ export function activate(context: vscode.ExtensionContext) {
     });
   }
 
-  const switchProjectsCommandId = 'coffeecup.switchProjects';
+  const switchTasksCommandId = 'coffeecup.switchTasks';
 
   const switchTaskCommand = vscode.commands.registerCommand(
-    switchProjectsCommandId,
+    switchTasksCommandId,
     () => {
       exec('coffeecup projects alias', (error, stdout, stderr) => {
         if (error) {
@@ -255,7 +255,7 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   statusBarItem.name = 'Coffeecup';
-  statusBarItem.command = switchProjectsCommandId;
+  statusBarItem.command = switchTasksCommandId;
   statusBarItem.tooltip = 'Click to switch projects/tasks';
   statusBarItem.show();
 
