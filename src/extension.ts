@@ -1,7 +1,7 @@
 import { exec } from 'child_process';
 import * as vscode from 'vscode';
 
-const outputChannel = vscode.window.createOutputChannel('Coffeecup');
+const outputChannel = vscode.window.createOutputChannel('CoffeeCup');
 const statusBarItem = vscode.window.createStatusBarItem(
   vscode.StatusBarAlignment.Right,
   100
@@ -21,7 +21,7 @@ const commentPlaceholders = [
 ];
 
 export function activate(context: vscode.ExtensionContext) {
-  outputChannel.appendLine('Coffeecup is now active!');
+  outputChannel.appendLine('CoffeeCup is now active!');
 
   exec('coffeecup version', (error, stdout, stderr) => {
     if (error) {
@@ -32,15 +32,15 @@ export function activate(context: vscode.ExtensionContext) {
       statusBarItem.dispose();
       if (error.message.includes('is not a valid command')) {
         outputChannel.appendLine(
-          `Coffeecup CLI version is outdated: "${stdout}"`
+          `CoffeeCup CLI version is outdated: "${stdout}"`
         );
 
         statusBarItem.dispose();
 
         vscode.window
           .showErrorMessage(
-            `Your coffeecup CLI is outdated!`,
-            'Visit Coffeecup CLI on GitHub to update'
+            `Your CoffeeCup CLI is outdated!`,
+            'Visit CoffeeCup CLI on GitHub to update'
           )
           .then((selection) => {
             if (!selection) {
@@ -56,8 +56,8 @@ export function activate(context: vscode.ExtensionContext) {
       } else {
         vscode.window
           .showErrorMessage(
-            `It looks like the coffeecup CLI is not installed!`,
-            'Visit Coffeecup CLI on GitHub'
+            `It looks like the CoffeeCup CLI is not installed!`,
+            'Visit CoffeeCup CLI on GitHub'
           )
           .then((selection) => {
             if (!selection) {
@@ -83,15 +83,15 @@ export function activate(context: vscode.ExtensionContext) {
     const patchVersion = Number(versionParts.at(-1) ?? '0');
     if (patchVersion < 6) {
       outputChannel.appendLine(
-        `Coffeecup CLI version is outdated: "${stdout}"`
+        `CoffeeCup CLI version is outdated: "${stdout}"`
       );
 
       statusBarItem.dispose();
 
       vscode.window
         .showErrorMessage(
-          `Your coffeecup CLI is outdated!`,
-          'Visit Coffeecup CLI on GitHub to update'
+          `Your CoffeeCup CLI is outdated!`,
+          'Visit CoffeeCup CLI on GitHub to update'
         )
         .then((selection) => {
           if (!selection) {
@@ -254,9 +254,9 @@ export function activate(context: vscode.ExtensionContext) {
     });
   });
 
-  statusBarItem.name = 'Coffeecup';
+  statusBarItem.name = 'coffeecup';
   statusBarItem.command = switchTasksCommandId;
-  statusBarItem.tooltip = 'Click to switch projects/tasks';
+  statusBarItem.tooltip = 'Click to switch tasks';
   statusBarItem.show();
 
   update();

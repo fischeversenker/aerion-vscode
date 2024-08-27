@@ -1,8 +1,8 @@
 {
   "name": "coffeecup",
   "publisher": "fischeversenker",
-  "displayName": "Coffeecup",
-  "description": "Start, resume, or stop new Coffeecup time entries. Requires Coffeecup CLI to be installed.",
+  "displayName": "CoffeeCup",
+  "description": "Start, resume, or stop new CoffeeCup time entries. Requires CoffeeCup CLI to be installed.",
   "version": "0.0.3",
   "icon": "images/icon.png",
   "repository": {
@@ -23,11 +23,11 @@
     "commands": [
       {
         "command": "coffeecup.switchTasks",
-        "title": "Coffeecup: Switch Tasks"
+        "title": "CoffeeCup: Switch Tasks"
       },
       {
         "command": "coffeecup.stop",
-        "title": "Coffeecup: Stop the running task"
+        "title": "CoffeeCup: Stop the running task"
       }
     ]
   },
