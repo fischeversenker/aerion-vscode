@@ -7,18 +7,6 @@ const statusBarItem = vscode.window.createStatusBarItem(
   100
 );
 let updateTimer: NodeJS.Timeout | undefined;
-const commentPlaceholders = [
-  "Debug the debugger's debugger",
-  'Perfect the art of the pixel push',
-  'Create a loading spinner that entertains',
-  "Rename 'div' tags for fun",
-  'Build a toggle switch that lies',
-  'Add a fake feature to the roadmap',
-  'Use more emojis in comments',
-  'Optimize the "404 - Page not found" experience',
-  'Introduce a CSS class named "invisible"',
-  'Plan an unnecessary framework discussion',
-];
 
 export function activate(context: vscode.ExtensionContext) {
   outputChannel.appendLine('CoffeeCup is now active!');
@@ -183,37 +171,37 @@ export function activate(context: vscode.ExtensionContext) {
         outputChannel.appendLine(`Result of "projects alias":\n${stdout}`);
 
         const lines = stdout.split('\n');
-        const aliases = lines
+        const projectOptions = lines
           .map((line) => {
             const parts = line.match(/^(\S+)\s+(.*?)\s+\(ID:\s*(\d+)\)$/);
-            return parts ? parts[1] : undefined;
+            return parts ? `${parts[2]} (alias: ${parts[1]})` : undefined;
           })
           .filter(Boolean) as string[];
         const theNoOption = "Don't start anything new. Stop the current task.";
-        aliases.push(theNoOption);
+        projectOptions.push(theNoOption);
 
         vscode.window
-          .showQuickPick(aliases, {
+          .showQuickPick(projectOptions, {
             title: 'Which project do you want to start/resume?',
             placeHolder:
               '(select the active project if you just want to add a new comment)',
           })
-          .then((alias) => {
-            if (!alias) {
+          .then((seletedProjectOption) => {
+            if (!seletedProjectOption) {
               return;
             }
 
-            if (alias === theNoOption) {
+            if (seletedProjectOption === theNoOption) {
               vscode.commands.executeCommand('coffeecup.stop');
               return;
             }
 
+            const alias = seletedProjectOption.match(/\(alias: (.*?)\)$/)?.[1];
+
             vscode.window
               .showInputBox({
                 prompt: 'Comment',
-                placeHolder: commentPlaceholders.at(
-                  Math.floor(Math.random() * commentPlaceholders.length)
-                ),
+                placeHolder: '(leave empty to skip)',
               })
               .then((comment) => {
                 if (comment === undefined) {
@@ -241,7 +229,7 @@ export function activate(context: vscode.ExtensionContext) {
                     );
                     vscode.window.showErrorMessage(
                       `Failed to start "${alias}"!`,
-                      { detail: `Error: "${error}"` }
+                      { detail: `Error: "${stderr}"` }
                     );
                     return;
                   }
@@ -249,12 +237,9 @@ export function activate(context: vscode.ExtensionContext) {
                   update();
                 });
                 vscode.window.showInformationMessage(
-                  `Started/resumed project "${alias}".`,
-                  {
-                    detail: comment
-                      ? 'Working on "' + comment + '".'
-                      : undefined,
-                  }
+                  `Started/resumed project "${alias}"${
+                    comment ? ', working on "' + comment + '"' : ''
+                  }`
                 );
               });
           });
@@ -266,11 +251,22 @@ export function activate(context: vscode.ExtensionContext) {
 
   const stopCommand = vscode.commands.registerCommand(stopCommandId, () => {
     exec(`${coffeeCupCliCommand} stop`, (error, stdout, stderr) => {
-      outputChannel.appendLine(`exec error while running 'stop': "${error}"`);
+      if (error) {
+        outputChannel.appendLine(`exec error while running 'stop': "${error}"`);
+        vscode.window.showErrorMessage(`Failed to stop the current task!`, {
+          detail: `Error: "${error}"`,
+        });
+        return;
+      }
 
       if (stderr) {
         outputChannel.appendLine(`stderr while running 'stop': "${stderr}"`);
+        vscode.window.showErrorMessage(`Failed to stop the current task!`, {
+          detail: `Error: "${stderr}"`,
+        });
+        return;
       }
+
       update();
       vscode.window.showInformationMessage(`Stopped task succesfully.`);
     });
