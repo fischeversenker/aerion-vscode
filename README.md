@@ -19,4 +19,4 @@ This extension adds time tracking from coffeecup.app to VSCode. Requires the Cof
 ## Requirements
 
 To run this, you need to have the CoffeeCup CLI installed. Get it from here: https://github.com/fischeversenker/coffeecup-cli.
-You need to be logged in using the CLI and you can only use tasks from projects for which you have set up an alias using `coffeecup projects alias`. See the CoffeeCup CLI repository for more details.
+You need to be logged in using the CLI and you can only use tasks from projects for which you have set up an alias using `coffeecup-cli projects alias`. See the CoffeeCup CLI repository for more details.

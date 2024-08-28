@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import { exec, execSync } from 'child_process';
 import * as vscode from 'vscode';
 
 const outputChannel = vscode.window.createOutputChannel('CoffeeCup');
@@ -23,10 +23,42 @@ const commentPlaceholders = [
 export function activate(context: vscode.ExtensionContext) {
   outputChannel.appendLine('CoffeeCup is now active!');
 
-  exec('coffeecup version', (error, stdout, stderr) => {
+  let coffeeCupCliCommand = 'coffeecup-cli';
+
+  // first figure out if the coffeecup-cli is installed
+  try {
+    execSync('coffeecup-cli version');
+  } catch (error) {
+    try {
+      execSync('coffeecup version');
+      coffeeCupCliCommand = 'coffeecup';
+    } catch (error) {
+      outputChannel.appendLine('CoffeeCup CLI is not installed!');
+
+      statusBarItem.dispose();
+
+      vscode.window
+        .showErrorMessage(
+          'It looks like the CoffeeCup CLI is not installed!',
+          'Visit CoffeeCup CLI on GitHub'
+        )
+        .then((selection) => {
+          if (!selection) {
+            return;
+          }
+
+          vscode.env.openExternal(
+            vscode.Uri.parse('https://github.com/fischeversenker/coffeecup-cli')
+          );
+        });
+    }
+  }
+
+  // make sure we are on a version >= 0.0.6
+  exec(`${coffeeCupCliCommand} version`, (error, stdout, stderr) => {
     if (error) {
       outputChannel.appendLine(
-        `exec error while running 'coffeecup version': "${error}"`
+        `exec error while running 'version': "${error}"`
       );
 
       statusBarItem.dispose();
@@ -74,9 +106,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     if (stderr) {
-      outputChannel.appendLine(
-        `stderr while running 'coffeecup version': "${stderr}"`
-      );
+      outputChannel.appendLine(`stderr while running 'version': "${stderr}"`);
     }
 
     const versionParts = stdout.split('.');
@@ -106,21 +136,19 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   function update() {
-    exec('coffeecup today', (error, stdout, stderr) => {
+    exec(`${coffeeCupCliCommand} today`, (error, stdout, stderr) => {
       if (error) {
         outputChannel.appendLine(
-          `exec error while running 'coffeecup today': "${error}"`
+          `exec error while running 'today': "${error}"`
         );
         return;
       }
       if (stderr) {
-        outputChannel.appendLine(
-          `stderr while running 'coffeecup today': "${stderr}"`
-        );
+        outputChannel.appendLine(`stderr while running 'today': "${stderr}"`);
       }
 
       outputChannel.appendLine(
-        `Result of 'coffeecup today':\n--------\n${stdout}--------\n`
+        `Result of 'today':\n--------\n${stdout}--------\n`
       );
 
       const lines = stdout.split('\n');
@@ -140,21 +168,19 @@ export function activate(context: vscode.ExtensionContext) {
   const switchTaskCommand = vscode.commands.registerCommand(
     switchTasksCommandId,
     () => {
-      exec('coffeecup projects alias', (error, stdout, stderr) => {
+      exec(`${coffeeCupCliCommand} projects alias`, (error, stdout, stderr) => {
         if (error) {
           outputChannel.appendLine(
-            `exec error while running 'coffeecup projects alias': "${error}"`
+            `exec error while running 'projects alias': "${error}"`
           );
           return;
         }
         if (stderr) {
           outputChannel.appendLine(
-            `stderr while running 'coffeecup projects alias': "${stderr}"`
+            `stderr while running 'projects alias': "${stderr}"`
           );
         }
-        outputChannel.appendLine(
-          `Result of "coffeecup projects alias":\n${stdout}`
-        );
+        outputChannel.appendLine(`Result of "projects alias":\n${stdout}`);
 
         const lines = stdout.split('\n');
         const aliases = lines
@@ -239,15 +265,11 @@ export function activate(context: vscode.ExtensionContext) {
   const stopCommandId = 'coffeecup.stop';
 
   const stopCommand = vscode.commands.registerCommand(stopCommandId, () => {
-    exec('coffeecup stop', (error, stdout, stderr) => {
-      outputChannel.appendLine(
-        `exec error while running 'coffeecup stop': "${error}"`
-      );
+    exec(`${coffeeCupCliCommand} stop`, (error, stdout, stderr) => {
+      outputChannel.appendLine(`exec error while running 'stop': "${error}"`);
 
       if (stderr) {
-        outputChannel.appendLine(
-          `stderr while running 'coffeecup stop': "${stderr}"`
-        );
+        outputChannel.appendLine(`stderr while running 'stop': "${stderr}"`);
       }
       update();
       vscode.window.showInformationMessage(`Stopped task succesfully.`);
