@@ -9,17 +9,15 @@ const statusBarItem = vscode.window.createStatusBarItem(
 let updateTimer: NodeJS.Timeout | undefined;
 
 export function activate(context: vscode.ExtensionContext) {
-  outputChannel.appendLine('CoffeeCup is now active!');
-
-  let coffeeCupCliCommand = 'coffeecup-cli';
+  const coffeeCupCliCommand = 'coffeecup-cli';
 
   // first figure out if the coffeecup-cli is installed
   try {
     execSync('coffeecup-cli version');
   } catch (error) {
     try {
-      execSync('coffeecup version');
-      coffeeCupCliCommand = 'coffeecup';
+      execSync(`${coffeeCupCliCommand} version`);
+      outputChannel.appendLine('CoffeeCup is now active!');
     } catch (error) {
       outputChannel.appendLine('CoffeeCup CLI is not installed!');
 
@@ -41,87 +39,6 @@ export function activate(context: vscode.ExtensionContext) {
         });
     }
   }
-
-  // make sure we are on a version >= 0.0.6
-  exec(`${coffeeCupCliCommand} version`, (error, stdout, stderr) => {
-    if (error) {
-      outputChannel.appendLine(
-        `exec error while running 'version': "${error}"`
-      );
-
-      statusBarItem.dispose();
-      if (error.message.includes('is not a valid command')) {
-        outputChannel.appendLine(
-          `CoffeeCup CLI version is outdated: "${stdout}"`
-        );
-
-        statusBarItem.dispose();
-
-        vscode.window
-          .showErrorMessage(
-            `Your CoffeeCup CLI is outdated!`,
-            'Visit CoffeeCup CLI on GitHub to update'
-          )
-          .then((selection) => {
-            if (!selection) {
-              return;
-            }
-
-            vscode.env.openExternal(
-              vscode.Uri.parse(
-                'https://github.com/fischeversenker/coffeecup-cli'
-              )
-            );
-          });
-      } else {
-        vscode.window
-          .showErrorMessage(
-            `It looks like the CoffeeCup CLI is not installed!`,
-            'Visit CoffeeCup CLI on GitHub'
-          )
-          .then((selection) => {
-            if (!selection) {
-              return;
-            }
-
-            vscode.env.openExternal(
-              vscode.Uri.parse(
-                'https://github.com/fischeversenker/coffeecup-cli'
-              )
-            );
-          });
-      }
-    }
-
-    if (stderr) {
-      outputChannel.appendLine(`stderr while running 'version': "${stderr}"`);
-    }
-
-    const versionParts = stdout.split('.');
-    const patchVersion = Number(versionParts.at(-1) ?? '0');
-    if (patchVersion < 6) {
-      outputChannel.appendLine(
-        `CoffeeCup CLI version is outdated: "${stdout}"`
-      );
-
-      statusBarItem.dispose();
-
-      vscode.window
-        .showErrorMessage(
-          `Your CoffeeCup CLI is outdated!`,
-          'Visit CoffeeCup CLI on GitHub to update'
-        )
-        .then((selection) => {
-          if (!selection) {
-            return;
-          }
-
-          vscode.env.openExternal(
-            vscode.Uri.parse('https://github.com/fischeversenker/coffeecup-cli')
-          );
-        });
-    }
-  });
 
   function update() {
     exec(`${coffeeCupCliCommand} today`, (error, stdout, stderr) => {
@@ -237,8 +154,7 @@ export function activate(context: vscode.ExtensionContext) {
                   update();
                 });
                 vscode.window.showInformationMessage(
-                  `Started/resumed project "${alias}"${
-                    comment ? ', working on "' + comment + '"' : ''
+                  `Started/resumed project "${alias}"${comment ? ', working on "' + comment + '"' : ''
                   }`
                 );
               });
