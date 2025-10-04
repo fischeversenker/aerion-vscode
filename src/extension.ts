@@ -1,7 +1,7 @@
 import { exec, execSync } from 'child_process';
 import * as vscode from 'vscode';
 
-const outputChannel = vscode.window.createOutputChannel('CoffeeCup');
+const outputChannel = vscode.window.createOutputChannel('Aerion');
 const statusBarItem = vscode.window.createStatusBarItem(
   vscode.StatusBarAlignment.Right,
   100
@@ -9,39 +9,35 @@ const statusBarItem = vscode.window.createStatusBarItem(
 let updateTimer: NodeJS.Timeout | undefined;
 
 export function activate(context: vscode.ExtensionContext) {
-  const coffeeCupCliCommand = 'coffeecup-cli';
+  const aerionCliCommand = 'aerion-cli';
 
-  // first figure out if the coffeecup-cli is installed
+  // first figure out if the aerion-cli is installed
   try {
-    execSync('coffeecup-cli version');
+    execSync(`${aerionCliCommand} version`);
+    outputChannel.appendLine('aerion is now active!');
   } catch (error) {
-    try {
-      execSync(`${coffeeCupCliCommand} version`);
-      outputChannel.appendLine('CoffeeCup is now active!');
-    } catch (error) {
-      outputChannel.appendLine('CoffeeCup CLI is not installed!');
+    outputChannel.appendLine('aerion CLI is not installed!');
 
-      statusBarItem.dispose();
+    statusBarItem.dispose();
 
-      vscode.window
-        .showErrorMessage(
-          'It looks like the CoffeeCup CLI is not installed!',
-          'Visit CoffeeCup CLI on GitHub'
-        )
-        .then((selection) => {
-          if (!selection) {
-            return;
-          }
+    vscode.window
+      .showErrorMessage(
+        'It looks like the aerion CLI is not installed!',
+        'Visit aerion CLI on GitHub'
+      )
+      .then((selection) => {
+        if (!selection) {
+          return;
+        }
 
-          vscode.env.openExternal(
-            vscode.Uri.parse('https://github.com/fischeversenker/coffeecup-cli')
-          );
-        });
-    }
+        vscode.env.openExternal(
+          vscode.Uri.parse('https://github.com/fischeversenker/aerion-cli')
+        );
+      });
   }
 
   function update() {
-    exec(`${coffeeCupCliCommand} today`, (error, stdout, stderr) => {
+    exec(`${aerionCliCommand} today`, (error, stdout, stderr) => {
       if (error) {
         outputChannel.appendLine(
           `exec error while running 'today': "${error}"`
@@ -68,12 +64,12 @@ export function activate(context: vscode.ExtensionContext) {
     });
   }
 
-  const switchTasksCommandId = 'coffeecup.switchTasks';
+  const switchTasksCommandId = 'aerion.switchTasks';
 
   const switchTaskCommand = vscode.commands.registerCommand(
     switchTasksCommandId,
     () => {
-      exec(`${coffeeCupCliCommand} projects alias`, (error, stdout, stderr) => {
+      exec(`${aerionCliCommand} projects alias`, (error, stdout, stderr) => {
         if (error) {
           outputChannel.appendLine(
             `exec error while running 'projects alias': "${error}"`
@@ -109,7 +105,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
 
             if (seletedProjectOption === theNoOption) {
-              vscode.commands.executeCommand('coffeecup.stop');
+              vscode.commands.executeCommand('aerion.stop');
               return;
             }
 
@@ -124,7 +120,7 @@ export function activate(context: vscode.ExtensionContext) {
                 if (comment === undefined) {
                   return;
                 }
-                let command = `coffeecup start ${alias}`;
+                let command = `aerion start ${alias}`;
                 if (comment) {
                   command += ` "${comment}"`;
                 }
@@ -154,7 +150,8 @@ export function activate(context: vscode.ExtensionContext) {
                   update();
                 });
                 vscode.window.showInformationMessage(
-                  `Started/resumed project "${alias}"${comment ? ', working on "' + comment + '"' : ''
+                  `Started/resumed project "${alias}"${
+                    comment ? ', working on "' + comment + '"' : ''
                   }`
                 );
               });
@@ -163,10 +160,10 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  const stopCommandId = 'coffeecup.stop';
+  const stopCommandId = 'aerion.stop';
 
   const stopCommand = vscode.commands.registerCommand(stopCommandId, () => {
-    exec(`${coffeeCupCliCommand} stop`, (error, stdout, stderr) => {
+    exec(`${aerionCliCommand} stop`, (error, stdout, stderr) => {
       if (error) {
         outputChannel.appendLine(`exec error while running 'stop': "${error}"`);
         vscode.window.showErrorMessage(`Failed to stop the current task!`, {
@@ -188,7 +185,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
   });
 
-  statusBarItem.name = 'coffeecup';
+  statusBarItem.name = 'aerion';
   statusBarItem.command = switchTasksCommandId;
   statusBarItem.tooltip = 'Click to switch tasks';
   statusBarItem.show();

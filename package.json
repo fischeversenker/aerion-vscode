@@ -1,13 +1,13 @@
 {
-  "name": "coffeecup",
+  "name": "aerion",
   "publisher": "fischeversenker",
-  "displayName": "CoffeeCup",
-  "description": "Start, resume, or stop new CoffeeCup time entries. Requires CoffeeCup CLI to be installed.",
-  "version": "0.0.7",
+  "displayName": "Aerion",
+  "description": "Start, resume, or stop new Aerion time entries. Requires Aerion CLI to be installed.",
+  "version": "0.1.0",
   "icon": "images/icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/fischeversenker/coffeecup-vscode"
+    "url": "https://github.com/fischeversenker/aerion-vscode"
   },
   "engines": {
     "vscode": "^1.91.0"
@@ -22,12 +22,12 @@
   "contributes": {
     "commands": [
       {
-        "command": "coffeecup.switchTasks",
-        "title": "CoffeeCup: Switch Tasks"
+        "command": "aerion.switchTasks",
+        "title": "aerion: Switch Tasks"
       },
       {
-        "command": "coffeecup.stop",
-        "title": "CoffeeCup: Stop the running task"
+        "command": "aerion.stop",
+        "title": "aerion: Stop the running task"
       }
     ]
   },
