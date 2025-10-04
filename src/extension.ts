@@ -120,7 +120,7 @@ export function activate(context: vscode.ExtensionContext) {
                 if (comment === undefined) {
                   return;
                 }
-                let command = `aerion start ${alias}`;
+                let command = `${aerionCliCommand} start ${alias}`;
                 if (comment) {
                   command += ` "${comment}"`;
                 }
